@@ -3,6 +3,8 @@ package com.example.task41;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.SystemClock;
@@ -20,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     long stopset;
     EditText workout;
     boolean run, change, click, press, going = false;
+    SharedPreferences sv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +32,9 @@ public class MainActivity extends AppCompatActivity {
         chronometer = findViewById(R.id.chronometer);
         textView = findViewById(R.id.textView);
         workout = findViewById(R.id.workout);
+        saving();
 
-        if(savedInstanceState!=null){
+        if (savedInstanceState != null) {
             String result = savedInstanceState.getString("result");
             boolean clicked = savedInstanceState.getBoolean("click");
             boolean changed = savedInstanceState.getBoolean("change");
@@ -38,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
             long stop_set = savedInstanceState.getLong("stop_set");
             textView.setText(result);
 
-            if(clicked) {
+            if (clicked) {
                 Long a3 = savedInstanceState.getLong("time");
                 chronometer.setBase(a3);
                 chronometer.start();
@@ -46,16 +50,16 @@ public class MainActivity extends AppCompatActivity {
                 going = true;
                 click = true;
                 change = false;
-            }else if(changed){
+            } else if (changed) {
                 chronometer.stop();
                 run = false;
                 change = false;
                 click = false;
                 press = true;
 
-            }else if(pressed){
+            } else if (pressed) {
                 chronometer.stop();
-                chronometer.setBase(SystemClock.elapsedRealtime()-stop_set);
+                chronometer.setBase(SystemClock.elapsedRealtime() - stop_set);
                 going = false;
                 run = false;
                 change = false;
@@ -64,28 +68,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void saving() {
+        SharedPreferences sp = getSharedPreferences("save", Context.MODE_PRIVATE);
+        String a3 = sp.getString("a1", "");
+        String a4 = sp.getString("a2", "");
+        textView.setText("Last time, you spent " + a3 + " on " + a4 );
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("result", textView.getText().toString());
         outState.putLong("time", chronometer.getBase());
-        outState.putBoolean("click",click);
-        outState.putBoolean("press",press);
-        outState.putBoolean("change",change);
-        outState.putLong("stop_set",stopset);
+        outState.putBoolean("click", click);
+        outState.putBoolean("press", press);
+        outState.putBoolean("change", change);
+        outState.putLong("stop_set", stopset);
 
     }
 
-    public void start(View v){
-        if(workout.getText().toString().isEmpty()){
-            Toast.makeText(this, "Enter type of workout first",Toast.LENGTH_SHORT).show();
-        }
-        else {
-            if(!run){
-                chronometer.setBase(SystemClock.elapsedRealtime()- stopset);
+    public void start(View v) {
+        if (workout.getText().toString().isEmpty()) {
+            Toast.makeText(this, "Enter type of workout first", Toast.LENGTH_SHORT).show();
+        } else {
+            if (!run) {
+                chronometer.setBase(SystemClock.elapsedRealtime() - stopset);
             }
 
-            chronometer.setBase(SystemClock.elapsedRealtime()- stopset);
+            chronometer.setBase(SystemClock.elapsedRealtime() - stopset);
             chronometer.start();
             run = true;
             going = true;
@@ -95,8 +105,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void stop(View v){
-        if(run){
+    public void stop(View v) {
+        if (run) {
             chronometer.stop();
             stopset = SystemClock.elapsedRealtime() - chronometer.getBase();
             run = false;
@@ -106,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void reset(View v){
+    public void reset(View v) {
         String a1 = chronometer.getText().toString();
         chronometer.setBase(SystemClock.elapsedRealtime());
         String a2 = workout.getText().toString();
@@ -117,5 +127,10 @@ public class MainActivity extends AppCompatActivity {
         run = false;
         change = false;
         click = false;
+        sv = getSharedPreferences("save", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sv.edit();
+        editor.putString("a1", a1);
+        editor.putString("a2", a2);
+        editor.apply();
     }
 }
